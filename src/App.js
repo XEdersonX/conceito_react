@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import api from './services/api';
 
 import './App.css';
 import backgroundImage from './assets/backgroud.jpg';
@@ -15,7 +16,15 @@ import Header from './components/Header';
 
 //Criando função de componentizacao
 function App() {
-  const [projects, setProjects] = useState(['Desenvolvimento de app', 'Front-end web']);
+  const [projects, setProjects] = useState([]);
+
+  //funcao  e  quando vai ser disparada
+  useEffect(() => {
+    api.get('/projects').then(response => {
+      //console.log(response);
+      setProjects(response.data)
+    });
+  }, []);
 
   /**
    * useState retorna um array com 2 posições
@@ -24,11 +33,20 @@ function App() {
    * 2. Função para atualizarmos esse valor
    */
 
-  function hundleAddProject(){
+  async function hundleAddProject() {
     //projects.push(`Novo projeto ${Date.now()}`);
 
     //...projects - utilizado para percorrer o array e copiar todos os projetos.
-    setProjects([...projects, `Novo projeto ${Date.now()}`]);
+    //setProjects([...projects, `Novo projeto ${Date.now()}`]);
+
+    const response = await api.post('/projects', {
+      title: `Novo projeto ${Date.now()}`,
+      owner: "Diego Fernandes"
+    });
+
+    const project = response.data;
+
+    setProjects([...projects, project])
 
     console.log(projects);
   }
@@ -43,7 +61,7 @@ function App() {
       <img width={300} src={backgroundImage}/>
 
       <ul>
-        {projects.map(project => <li key={project}>{project}</li>)}
+        {projects.map(project => <li key={project.id}>{project.title}</li>)}
       </ul>
 
       <button type="button" onClick={hundleAddProject}>Adicionar projeto</button>
